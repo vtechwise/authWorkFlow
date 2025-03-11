@@ -15,11 +15,12 @@ const registerUser = async (req, res) => {
   if (emailAlreadyExist) {
     throw new BadRequestError("Email already exist");
   }
-  const response = await User.create({ email, name, password });
 
-  const user = createTokenUser(response);
-  attachCookieToResponse(res, user);
-  res.status(StatusCodes.CREATED).json(user);
+  const verificationToken = 'fake token'
+  const response = await User.create({ email, name, password,verificationToken });
+
+ 
+  res.status(StatusCodes.CREATED).json({msg:'Check your email to verify your account '});
 };
 
 const loginUser = async (req, res) => {
@@ -28,8 +29,12 @@ const loginUser = async (req, res) => {
     throw new BadRequestError("Please provide both value");
   }
   const user = await User.findOne({ email });
+
   if (!user) {
     throw new BadRequestError("Invalid Credentials");
+  }
+  if (!user.isVerified) {
+    throw new UnauthenticatedError('Please verify your account')
   }
   const correctPassword = await user.comparePassword(password);
 
