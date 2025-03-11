@@ -15,11 +15,12 @@ const registerUser = async (req, res) => {
   if (emailAlreadyExist) {
     throw new BadRequestError("Email already exist");
   }
-  const response = await User.create({ email, name, password });
 
-  const user = createTokenUser(response);
-  attachCookieToResponse(res, user);
-  res.status(StatusCodes.CREATED).json(user);
+  const verificationToken = 'fake token'
+  const response = await User.create({ email, name, password,verificationToken });
+
+ 
+  res.status(StatusCodes.CREATED).json({msg:'Check your email to verify your account '});
 };
 
 const loginUser = async (req, res) => {
