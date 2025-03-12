@@ -43,6 +43,8 @@ const verifyEmail = async (req, res) => {
   user.isVerified = true;
   user.veirfied = Date.now();
   user.verificationToken = "";
+
+  res.status(StatusCodes.OK).json(({msg:'Email verified'}))
   await user.save();
 };
 
