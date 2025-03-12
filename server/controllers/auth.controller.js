@@ -8,6 +8,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const { createJWT, createTokenUser } = require("../utils");
 const { attachCookieToResponse } = require("../utils/jwt");
+const sendEmail = require("../utils/sendEmail.js");
+const crypto = require('crypto')
 
 const registerUser = async (req, res) => {
   const { email, name, password } = req.body;
@@ -17,12 +19,20 @@ const registerUser = async (req, res) => {
   }
 
   const verificationToken = crypto.randomBytes(40).toString("hex");
+
   const response = await User.create({
     email,
     name,
     password,
     verificationToken,
   });
+
+ try {
+   await sendEmail();
+   console.log("Email sent successfully!");
+ } catch (error) {
+   console.error("Error sending email:", error);
+ }
 
   res
     .status(StatusCodes.CREATED)
@@ -44,7 +54,7 @@ const verifyEmail = async (req, res) => {
   user.veirfied = Date.now();
   user.verificationToken = "";
 
-  res.status(StatusCodes.OK).json(({msg:'Email verified'}))
+  res.status(StatusCodes.OK).json({ msg: "Email verified" });
   await user.save();
 };
 
@@ -84,5 +94,5 @@ module.exports = {
   registerUser,
   loginUser,
   logoutUser,
-  verifyEmail
+  verifyEmail,
 };
