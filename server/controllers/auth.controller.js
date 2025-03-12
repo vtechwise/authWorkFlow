@@ -16,7 +16,7 @@ const registerUser = async (req, res) => {
     throw new BadRequestError("Email already exist");
   }
 
-  const verificationToken = 'fake token'
+  const verificationToken = crypto.randomBytes(40).toString('hex')
   const response = await User.create({ email, name, password,verificationToken });
 
  
