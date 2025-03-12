@@ -5,6 +5,7 @@ const {
   updateUser,
   deleteUser,
   updateUserPassword,
+  verifyEm
 } = require("../controllers/users.controller");
 const { authenticateUser, authorizePermissions } = require("../middleware/authentication");
 const router = express.Router();
