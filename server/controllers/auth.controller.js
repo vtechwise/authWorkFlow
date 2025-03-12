@@ -6,10 +6,13 @@ const {
 } = require("../errors");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
-const { createJWT, createTokenUser } = require("../utils");
+const {
+  createJWT,
+  createTokenUser,
+  sendVerificationEmail,
+} = require("../utils");
 const { attachCookieToResponse } = require("../utils/jwt");
-const sendEmail = require("../utils/sendEmail.js");
-const crypto = require('crypto')
+const crypto = require("crypto");
 
 const registerUser = async (req, res) => {
   const { email, name, password } = req.body;
@@ -20,19 +23,24 @@ const registerUser = async (req, res) => {
 
   const verificationToken = crypto.randomBytes(40).toString("hex");
 
-  const response = await User.create({
+  const user = await User.create({
     email,
     name,
     password,
     verificationToken,
   });
-
- try {
-   await sendEmail();
-   console.log("Email sent successfully!");
- } catch (error) {
-   console.error("Error sending email:", error);
- }
+  const origin = "http://localhost:3000/";
+  try {
+    await sendVerificationEmail({
+      name: user.name,
+      email: user.email,
+      verifcationToken: user.verificationToken,
+      origin,
+    });
+    console.log("Email sent successfully!");
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
 
   res
     .status(StatusCodes.CREATED)
