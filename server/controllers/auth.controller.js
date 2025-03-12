@@ -16,11 +16,34 @@ const registerUser = async (req, res) => {
     throw new BadRequestError("Email already exist");
   }
 
-  const verificationToken = crypto.randomBytes(40).toString('hex')
-  const response = await User.create({ email, name, password,verificationToken });
+  const verificationToken = crypto.randomBytes(40).toString("hex");
+  const response = await User.create({
+    email,
+    name,
+    password,
+    verificationToken,
+  });
 
- 
-  res.status(StatusCodes.CREATED).json({msg:'Check your email to verify your account '});
+  res
+    .status(StatusCodes.CREATED)
+    .json({ msg: "Check your email to verify your account " });
+};
+
+const verifyEmail = async (req, res) => {
+  const { verificationToken, email } = req.body;
+  const user = await User.findOne({ email });
+  if (!email) {
+    throw new UnauthenticatedError(
+      "Authentication Failed email does not exist"
+    );
+  }
+  if (user.verificationToken !== verificationToken) {
+    throw new UnauthenticatedError("Invalid verification token");
+  }
+  user.isVerified = true;
+  user.veirfied = Date.now();
+  user.verificationToken = "";
+  await user.save();
 };
 
 const loginUser = async (req, res) => {
@@ -34,7 +57,7 @@ const loginUser = async (req, res) => {
     throw new BadRequestError("Invalid Credentials");
   }
   if (!user.isVerified) {
-    throw new UnauthenticatedError('Please verify your account')
+    throw new UnauthenticatedError("Please verify your account");
   }
   const correctPassword = await user.comparePassword(password);
 
@@ -59,4 +82,5 @@ module.exports = {
   registerUser,
   loginUser,
   logoutUser,
+  verifyEmail
 };
